@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PDF to Image Converter</title>
+    <style></style>
+</head>
+<body>
+    <h1>PDF to Image Converter</h1>
+    <input type="file" id="pdfFile">
+    <button onclick="convert()">Convert</button>
+    <a id="downloadLink" style="display:none;">Download Converted File</a>
+
+    <script>
+        function convert(){
+            const pdfFile = document.getElementById('pdfFile').files[0];
+            if(!pdfFile){
+                alert('Please provide a valid pdf file');
+                return;
+            }
+            const formData = new FormData();
+            formData.append('file',pdfFile);
+            formData.append('formatName',"png");
+            fetch('/convert', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if(!response.ok){
+                    throw new Error('Conversion Failed');
+                }
+                return response.json();
+            })
+            .then(data => {
+                data.forEach(url => {
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.textContent = 'Download Image';
+                    link.download = 'image.png'; // Set the filename for the image
+                    const br = document.createElement('br');
+                    document.body.appendChild(link); // Append the link to the document body
+                    document.body.appendChild(br); // Append the line break to the document body
+                });
+            })
+            .catch(error => {
+                alert('error:'+error.message);
+            });
+
+        }
+    </script>
+</body>
+</html>
